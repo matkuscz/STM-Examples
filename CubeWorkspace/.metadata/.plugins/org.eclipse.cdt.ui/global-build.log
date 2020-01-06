@@ -1,0 +1,25 @@
+20:33:17 **** Incremental Build of configuration Debug for project LCDTest ****
+make -j4 all 
+arm-none-eabi-gcc "../Core/Src/main.c" -mcpu=cortex-m7 -std=gnu11 -g3 -DUSE_HAL_DRIVER -DSTM32H753xx -DDEBUG -c -I../Drivers/CMSIS/Include -I../Core/Inc -I../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I../Drivers/STM32H7xx_HAL_Driver/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -MMD -MP -MF"Core/Src/main.d" -MT"Core/Src/main.o" --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -o "Core/Src/main.o"
+../Core/Src/main.c: In function 'main':
+../Core/Src/main.c:429:23: warning: initialization makes integer from pointer without a cast [-Wint-conversion]
+    unsigned int adr = &pokus;
+                       ^
+../Core/Src/main.c:429:17: warning: unused variable 'adr' [-Wunused-variable]
+    unsigned int adr = &pokus;
+                 ^~~
+../Core/Src/main.c:424:12: warning: variable 'c' set but not used [-Wunused-but-set-variable]
+    int a,b,c;
+            ^
+../Core/Src/main.c:290:7: warning: unused variable 'xu' [-Wunused-variable]
+   int xu = 3;
+       ^~
+../Core/Src/main.c:260:7: warning: unused variable 'popo' [-Wunused-variable]
+   int popo = 1;
+       ^~~~
+arm-none-eabi-gcc -o "LCDTest.elf" @"objects.list"   -mcpu=cortex-m7 -T"Q:\ST\CubeWorkspace\LCDTest\STM32H753XIHX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LCDTest.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+q:\st\installed\stm32cubeide_1.1.0\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610\tools\arm-none-eabi\bin\ld.exe: LCDTest.elf section `FLASH' will not fit in region `RAM_D1'
+q:\st\installed\stm32cubeide_1.1.0\stm32cubeide\plugins\com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.7-2018-q2-update.win32_1.0.0.201904181610\tools\arm-none-eabi\bin\ld.exe: region `RAM_D1' overflowed by 709816 bytes
+collect2.exe: error: ld returned 1 exit status
+make: *** [makefile:41: LCDTest.elf] Error 1
+"make -j4 all" terminated with exit code 2. Build might be incomplete.

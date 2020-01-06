@@ -1,0 +1,54 @@
+Moje deska:		STM32H753I-EVAL2
+Muje MCPU:		STM32H753XI
+
+The LTDC is a master on the AHB architecture which performs read access on internal and external memories. The LTDC has two independent layers, each one with its own FIFO enabling more flexibility of the display.
+The LTDC controller autonomously fetches graphical data at the speed of the AHB bus from the framebuffer. The graphical data is then stored in one of the FIFO internal layers then driven to the display.
+The system architecture enables that graphics can be built and plotted to the screen without any CPU intervention. The LTDC retrieves the data belonging to an image from the framebuffer, while the Chrom-Art Accelerator® (DMA2D) is preparing the next images.
+
+The LTDC is reset by setting the LTDCRST bit in the RCC_APB2RSTR register.
+
+
+Displej: 640x480 LCD TFT
+Displej Controller: LTDC
+LCD Module Connector: 8x R,G,B
+Framebuffer size: 640x480x8 = 2 457 600 b = 307 200 B = 307.2 kB
+Framebuffer location: ???? Internal SRAM/External SRAM/External SDRAM - External connected thru FMC
+
+Pixel Clock OK ???
+LCD_CLK = total screen size X refresh rate
+total screen size = width X heigth
+
+LCD_CLK = 800 x 600 x 60 = 28 800 000 = 28.8 MHz
+
+LTDC Required Bandwitch depends on:
+- Number of used LTDC Layers
+- LTDC Color depth
+- Pixel Clock
+
+Max required bandwitch = 
+LTDC Req BW = LCD_CLK * BppLayer 1
+nebo pri dvou vrstvach
+LTDC Req BW = LCD_CLK * (BppLayer 1 + BppLayer2)
+
+Cili pro dve vrstvy u nas: 28 800 000 * (8 + 8) = 460 800 000 = 460.8 MHz
+----- Tohle cislo nesmi prekrocit dostupnej memory bandwith, jinak se to zacne jebat a bude se dit FIFO Underrun flag bude nastaven, pokud byl povolen FIFO Underrun Interrupt
+
+If the memory used to store the framebuffer is also used for other application purposes, it may impact the graphical performances of the system.
+
+
+LTDC peripheral configuration
+=============================
+It is recommended to reset the LTDC peripheral before starting the configuration and also it is recommended to guarantee that the peripheral is in reset state. The LTDC can be reset by setting the corresponding bit in the RCC_APB2RSTR register, which resets the three clock domains.
+The LTDC GPIOs should be configured to the correspondent alternate function.
+All GPIOs have to be configured in very high-speed mode.
+
+V nastavovacim UI:
+The user can also configure all the GPIOs by setting the right alternate function for each GPIO one by one.
+Once that all the LTDC GPIOs pins are configured, the user should set their speed to very high.
+The LCD_DISP pin (PI12 pin) has to be configured as an output push pull with high level in order to enable the display, otherwise the display stays in standby mode.
+U nas spis PK7 - LTDC_DE
+
+The FIFO underrun and transfer error interrupts are enabled in the hal_ltdc driver HAL_LTDC_Init() function. So the user should just enable the LTDC global interrupt on the NVIC side.
+
+
+

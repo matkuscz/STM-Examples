@@ -1,0 +1,14 @@
+Moje deska:		STM32H753I-EVAL2
+Muje MCPU:		STM32H753XI
+
+The LTDC is a master on the AHB architecture which performs read access on internal and external memories. The LTDC has two independent layers, each one with its own FIFO enabling more flexibility of the display.
+The LTDC controller autonomously fetches graphical data at the speed of the AHB bus from the framebuffer. The graphical data is then stored in one of the FIFO internal layers then driven to the display.
+The system architecture enables that graphics can be built and plotted to the screen without any CPU intervention. The LTDC retrieves the data belonging to an image from the framebuffer, while the Chrom-Art Accelerator® (DMA2D) is preparing the next images.
+
+The LTDC is reset by setting the LTDCRST bit in the RCC_APB2RSTR register.
+
+
+Displej: 640x480 LCD TFT
+Displej Controller: LTDC
+LCD Module Connector: 8x R,G,B
+Framebuffer size: 640x480x8 = 2 457 600 b = 307 200 B = 307.2 kB

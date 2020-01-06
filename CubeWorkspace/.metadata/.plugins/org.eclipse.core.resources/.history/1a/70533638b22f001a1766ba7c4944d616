@@ -1,0 +1,244 @@
+Moje deska:		STM32H753I-EVAL2
+Muje MCPU:		STM32H753XI
+
+The LTDC is a master on the AHB architecture which performs read access on internal and external memories. The LTDC has two independent layers, each one with its own FIFO enabling more flexibility of the display.
+The LTDC controller autonomously fetches graphical data at the speed of the AHB bus from the framebuffer. The graphical data is then stored in one of the FIFO internal layers then driven to the display.
+The system architecture enables that graphics can be built and plotted to the screen without any CPU intervention. The LTDC retrieves the data belonging to an image from the framebuffer, while the Chrom-Art Accelerator® (DMA2D) is preparing the next images.
+
+The LTDC is reset by setting the LTDCRST bit in the RCC_APB2RSTR register.
+
+
+Displej: 640x480 LCD TFT
+Displej Controller: LTDC
+LCD Module Connector: 8x R,G,B
+Framebuffer size: 640x480x8 = 2 457 600 b = 307 200 B = 307.2 kB
+Framebuffer location: ???? Internal SRAM/External SRAM/External SDRAM - External connected thru FMC
+
+Pixel Clock OK ???
+LCD_CLK = total screen size X refresh rate
+total screen size = width X heigth
+
+LCD_CLK = 800 x 600 x 60 = 28 800 000 = 28.8 MHz
+
+LTDC Required Bandwitch depends on:
+- Number of used LTDC Layers
+- LTDC Color depth
+- Pixel Clock
+
+Max required bandwitch = 
+LTDC Req BW = LCD_CLK * BppLayer 1
+nebo pri dvou vrstvach
+LTDC Req BW = LCD_CLK * (BppLayer 1 + BppLayer2)
+
+Cili pro dve vrstvy u nas: 28 800 000 * (8 + 8) = 460 800 000 = 460.8 MHz
+----- Tohle cislo nesmi prekrocit dostupnej memory bandwith, jinak se to zacne jebat a bude se dit FIFO Underrun flag bude nastaven, pokud byl povolen FIFO Underrun Interrupt
+
+If the memory used to store the framebuffer is also used for other application purposes, it may impact the graphical performances of the system.
+
+
+LTDC peripheral configuration
+=============================
+It is recommended to reset the LTDC peripheral before starting the configuration and also it is recommended to guarantee that the peripheral is in reset state. The LTDC can be reset by setting the corresponding bit in the RCC_APB2RSTR register, which resets the three clock domains.
+The LTDC GPIOs should be configured to the correspondent alternate function.
+All GPIOs have to be configured in very high-speed mode.
+
+V nastavovacim UI:
+The user can also configure all the GPIOs by setting the right alternate function for each GPIO one by one.
+Once that all the LTDC GPIOs pins are configured, the user should set their speed to very high.
+The LCD_DISP pin (PI12 pin) has to be configured as an output push pull with high level in order to enable the display, otherwise the display stays in standby mode.
+U nas spis PK7 - LTDC_DE
+
+The FIFO underrun and transfer error interrupts are enabled in the hal_ltdc driver HAL_LTDC_Init() function. So the user should just enable the LTDC global interrupt on the NVIC side.
+
+
+
+
+
+Displaying an image from the internal Flash
+===========================================
+In order to ensure that the LTDC is properly configured respecting the display panel's specifications, it is important to display an image from the internal Flash.
+To do it, the user should first convert the image to a C or a header file and add it to the project.
+
+The user must generate the header file respecting the configured LTDC layer pixel input format RGB565 (see Section : Pixel input format on page 27 and Section 4.8: Storing graphic primitives on page 58).
+
+The generated header file should be included in the main.c file. It includes a table of 32-bit words where each word represents two pixels.
+In this header file, the user must comment the structure definition located just after the table and keep only the table definition as shown below
+
+The generated project by STM32CubeMX should include in the main.c file the MX_LTDC_Init() function that allows to configure the LTDC peripheral.
+In order to display the image, the user should set the LTDC Layer1 framebuffer start address to the address of the image in the internal Flash.
+The MX_LTDC_Init() function is presented below with the framebuffer start address setting.
+
+
+LTDC programming procedure
+• Enable the LTDC clock in the RCC register.
+• Configure the required pixel clock following the panel datasheet.
+• Configure the synchronous timings: VSYNC, HSYNC, vertical and horizontal back
+porch, active data area and the front porch timings following the panel datasheet as
+described in the Section 31.4.1: LTDC global configuration parameters.
+• Configure the synchronous signals and clock polarity in the LTDC_GCR register.
+• If needed, configure the background color in the LTDC_BCCR register.
+• Configure the needed interrupts in the LTDC_IER and LTDC_LIPCR register.
+• Configure the layer1/2 parameters by:
+– programming the layer window horizontal and vertical position in the
+LTDC_LxWHPCR and LTDC_WVPCR registers. The layer window must be in the
+active data area.
+– programming the pixel input format in the LTDC_LxPFCR register
+– programming the color frame buffer start address in the LTDC_LxCFBAR register
+– programming the line length and pitch of the color frame buffer in the
+LTDC_LxCFBLR register
+– programming the number of lines of the color frame buffer in the
+LTDC_LxCFBLNR register
+– if needed, loading the CLUT with the RGB values and its address in the
+LTDC_LxCLUTWR register
+– If needed, configuring the default color and the blending factors respectively in the
+LTDC_LxDCCR and LTDC_LxBFCR registers
+• Enable layer1/2 and if needed the CLUT in the LTDC_LxCR register.
+• If needed, enable dithering and color keying respectively in the LTDC_GCR and
+LTDC_LxCKCR registers. They can be also enabled on the fly.
+• Reload the shadow registers to active register through the LTDC_SRCR register.
+• Enable the LCD-TFT controller in the LTDC_GCR register.
+• All layer parameters can be modified on the fly except the CLUT. The new configuration
+has to be either reloaded immediately or during vertical blanking period by configuring
+the LTDC_SRCR register.
+Note: All layer’s registers are shadowed. Once a register is written, it must not be modified again
+before the reload has been done. Thus, a new write to the same register overrides the
+previous configuration if not yet reloaded.
+
+
+
+Postup:
+    Enable clocking of LTDC module
+    Configure the clocking system and the frequency of data output (pixel clock)
+    Configure I / O ports (GPIO) to work with LTDC
+    Set up timings for our display model.
+    Adjust the polarity of the signals. Already done by default
+    Specify the background color of the display. We will not see it yet, you can leave it "by zeros"
+    Set the actual size of the visible display area for a specific layer
+    Select a color format: ARGB8888, RGB 888, RGB565, etc.
+    Specify the address of the array, which will act as a frame buffer.
+    Specify the amount of data in one line (length by width)
+    Specify the number of lines (display height)
+    Include layer we work with
+    Enable LTDC Module
+
+
+
+
+
+Tááákže:
+Hodiny:
+For each peripheral, the application can control the activation/deactivation of its kernel and
+bus interface clock. Prior to use a peripheral, the CPU has to enable it (by setting PERxEN
+to ‘1’), and define if this peripheral remains active in CSleep mode (by setting PERxLPEN to
+‘1’). This is called ‘allocation’ of a peripheral to the CPU (refer to Section 7.5.10: Peripheral
+allocation for more details).
+
+As shown in Figure 57, FLASH, AXISRAM, SRAM4, ITCM, DTCM1 and DTCM2 are
+implicitly allocated to the CPU. As a result, there is no enable bit allowing the CPU to
+allocate these memories.
+If the CPU wants to use memories located into D2 domain (SRAM1, SRAM2 and SRAM3), it
+has to enable them.
+
+The CPU can allocate a peripheral and hence control its kernel and bus interface clock.
+The CPU can allocate a peripheral by setting the dedicated PERxEN bit located into:
+• RCC_xxxxENR registers or
+• RCC_C1_xxxxENR registers.
+The CPU can control the peripheral clocks gating when it is in CSleep mode via the
+PERxLPEN bits located into:
+• RCC_xxxxLPENR registers or
+• RCC_C1_xxxxLPENR registers.
+
+The peripheral allocation bits (PERxEN bits) are used by the hardware to provide the kernel
+and bus interface clocks to the peripherals. However they are also used to link peripherals
+to the CPU (CPU sub-system). In this way, the hardware is able to safely gate the peripheral
+clocks and bus matrix clocks according to CPU states. The PWR block also uses this
+information to control properly the domain states.
+
+As mentioned previously, each peripheral requires a bus interface clock, named
+rcc_perx_bus_ck (for peripheral ‘x’). This clock can be an APB, AHB or AXI clock,
+according to which bus the peripheral is connected.
+The clocks used as bus interface for peripherals located in D1 domain, could be rcc_aclk,
+rcc_hclk3 or rcc_pclk3, depending on the bus connected to each peripheral. For simplicity
+sake, these clocks are named rcc_bus_d1_ck.
+In the same way, the signal named rcc_bus_d2_ck represents rcc_hclk1, rcc_hclk2,
+rcc_pclk1 or rcc_pclk2, depending on the bus connected to each peripheral of D2 domain.
+Similarly, the signal rcc_bus_d3_ck represents rcc_hclk4 or rcc_pclk4 for peripherals
+located in D3.
+Some peripherals (SAI, UART...) also require a dedicated clock for their communication
+interface. This clock is generally asynchronous with respect to the bus interface clock. It is
+named kernel clock (perx_ker_ckreq). Both clocks can be gated according to several
+conditions detailed hereafter.
+As shown in Figure 59, enabling the kernel and bus interface clocks of each peripheral
+depends on several input signals:
+• PERxEN and PERxLPEN bits
+PERxEN represents the peripheral enable (allocation) bit for the CPU. The CPU can
+write these bits to ‘1’ via RCC_C1_xxxxENR or RCC_xxxxENR registers.
+• PERxAMEN bits
+The PERxAMEN bits are belong to RCC D3 Autonomous mode Register
+(RCC_D3AMR).
+• CPU state (c_sleep and c_deepsleep signals)
+• D3 domain state (d3_deepsleep signal)
+• The kernel clock request (perx_ker_ckreq) of the peripheral itself, when the feature is
+available.
+
+Note that the control of PERxEN and PERxLPEN bits can be performed at two different
+address offset:0x0D0 and 0x130. So the application can use the registers named:
+• RCC_xxxxENR or RCC_C1_xxxxENR to control the PERxEN bits
+• RCC_xxxxLPENR or RCC_C1_xxxxLPENR to control the PERxLPEN bits
+• RCC_RSR or RCC_C1_RSR to control the reset flag status bits.
+This feature is provided to insure the compatibility with other products of this family.
+
+
+
+
+
+RCC APB3 Clock Register (RCC_APB3ENR)
+	Bit 3 LTDCEN: LTDC peripheral clock enable
+	Provides the pixel clock (ltdc_ker_ck) to the LTDC block.
+	Set and reset by software.
+	0: LTDC peripheral clock disabled (default after reset)
+	1: LTDC peripheral clock provided to the LTDC block
+	
+	
+RCC APB3 Sleep Clock Register (RCC_APB3LPENR)
+	Bit 3 LTDCLPEN: LTDC peripheral clock enable during CSleep mode
+	Provides the pixel clock (ltdc_ker_ck) to the LTDC block.
+	Set and reset by software.
+	0: LTDC clock disabled during CSleep mode
+	1: LTDC clock provided to the LTDC during CSleep mode (default after reset)	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
