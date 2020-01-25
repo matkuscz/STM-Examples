@@ -13,7 +13,7 @@ The LTDC is reset by setting the LTDCRST bit in the RCC_APB2RSTR register.
 Displej: 640x480 LCD TFT
 Displej Controller: LTDC
 LCD Module Connector: 8x R,G,B
-Framebuffer size: 640x480x8 = 2 457 600 b = 307 200 B = 307.2 kB
+Framebuffer size: 640x480x32 = 9 830 400 b = 1 228 800 B = 1.2288 MB
 Framebuffer location: ???? Internal SRAM/External SRAM/External SDRAM - External connected thru FMC
 
 Pixel Clock OK ???
