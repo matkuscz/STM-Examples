@@ -45,7 +45,8 @@ do SECTIONS
   /* Zkontrolujeme, jestli se nam to tam vejde */
   ASSERT( LENGTH(SDRAMMTK) >= (__sekcemtk_end__ - __sekcemtk_start__), "Nevejdeme se do SDRAMMTK" )
   
-  
+  a promennou v kodu pak oznacit:
+  __attribute__((__section__(".sekcemtk"))) uint32_t pole[100];
   
   
 pak to pada...
@@ -58,3 +59,6 @@ Your code in SystemInit() needs to completely initialize the external bus and me
 You should 'STOP' the debugger once your code crashes and see where it is, most likely in the while(1) loop of you Hard Fault Handler.
 
 
+
+Jina moznost ja asi dat rovnou adresu prez atribut:
+int32_t Array[xxxxx] __attribute__((at(0xD000000)));
