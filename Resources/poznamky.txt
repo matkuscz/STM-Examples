@@ -9,3 +9,38 @@ https://forum.atollic.com/viewtopic.php?t=109
 
 STM Cube IDE v Linu:
 https://stackoverflow.com/questions/22713834/libusb-cannot-open-usb-device-permission-isse-netbeans-ubuntu
+
+
+
+
+
+Moje sekce:
+
+do MEMORY
+{
+
+}
+
+
+dat:
+
+SDRAMMTK  (rxw)    : ORIGIN = 0xCC000000,   LENGTH = 4096K
+
+
+
+
+do SECTIONS
+{
+
+} dat to dole
+
+.sekcemtk :
+  {
+  	. = ALIGN(4);
+  	__sekcemtk_start__ = .;
+  		*(.sekcemtk*)
+  	__sekcemtk_end__ = .;
+  } >SDRAMMTK
+  
+  /* Zkontrolujeme, jestli se nam to tam vejde */
+  ASSERT( LENGTH(SDRAMMTK) >= (__sekcemtk_end__ - __sekcemtk_start__), "Nevejdeme se do SDRAMMTK" )
