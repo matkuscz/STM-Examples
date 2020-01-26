@@ -5,3 +5,7 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/4/html/Us
 https://www.silabs.com/community/mcu/32-bit/knowledge-base.entry.html/2018/12/06/understand_the_gnul-PTm6
 
 https://forum.atollic.com/viewtopic.php?t=109
+
+
+STM Cube IDE v Linu:
+https://stackoverflow.com/questions/22713834/libusb-cannot-open-usb-device-permission-isse-netbeans-ubuntu
