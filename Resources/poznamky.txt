@@ -1,0 +1,7 @@
+Promenna do externi pameti:
+
+http://www.scoberlin.de/content/media/http/informatik/gcc_docs/ld_3.html
+https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/4/html/Using_ld_the_GNU_Linker/simple-example.html
+https://www.silabs.com/community/mcu/32-bit/knowledge-base.entry.html/2018/12/06/understand_the_gnul-PTm6
+
+https://forum.atollic.com/viewtopic.php?t=109
