@@ -44,3 +44,17 @@ do SECTIONS
   
   /* Zkontrolujeme, jestli se nam to tam vejde */
   ASSERT( LENGTH(SDRAMMTK) >= (__sekcemtk_end__ - __sekcemtk_start__), "Nevejdeme se do SDRAMMTK" )
+  
+  
+  
+  
+pak to pada...
+
+
+his isn't your main() function, but rather the Keil code to initialize the statics, ie copy initial content to RAM, and zero other areas. Once the __main function completes it calls your main function.
+
+Your code in SystemInit() needs to completely initialize the external bus and memories so that data you have directed to external memory via the linker can be placed there. This means clocks, pins, peripheral, all the things need to bring up the interface and devices attached to it.
+
+You should 'STOP' the debugger once your code crashes and see where it is, most likely in the while(1) loop of you Hard Fault Handler.
+
+
