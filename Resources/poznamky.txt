@@ -62,3 +62,7 @@ You should 'STOP' the debugger once your code crashes and see where it is, most 
 
 Jina moznost ja asi dat rovnou adresu prez atribut:
 int32_t Array[xxxxx] __attribute__((at(0xD000000)));
+
+ale to nefaka - atribut ignorovan
+
+https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/
