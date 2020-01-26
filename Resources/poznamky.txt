@@ -66,3 +66,10 @@ int32_t Array[xxxxx] __attribute__((at(0xD000000)));
 ale to nefaka - atribut ignorovan
 
 https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/
+
+
+
+https://www.openstm32.org/Using+CCM+Memory?structure=Documentation
+
+
+
