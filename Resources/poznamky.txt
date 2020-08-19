@@ -5,3 +5,71 @@ https://access.redhat.com/documentation/en-US/Red_Hat_Enterprise_Linux/4/html/Us
 https://www.silabs.com/community/mcu/32-bit/knowledge-base.entry.html/2018/12/06/understand_the_gnul-PTm6
 
 https://forum.atollic.com/viewtopic.php?t=109
+
+
+STM Cube IDE v Linu:
+https://stackoverflow.com/questions/22713834/libusb-cannot-open-usb-device-permission-isse-netbeans-ubuntu
+
+
+
+
+
+Moje sekce:
+
+do MEMORY
+{
+
+}
+
+
+dat:
+
+SDRAMMTK  (rxw)    : ORIGIN = 0xCC000000,   LENGTH = 4096K
+
+
+
+
+do SECTIONS
+{
+
+} dat to dole
+
+.sekcemtk :
+  {
+  	. = ALIGN(4);
+  	__sekcemtk_start__ = .;
+  		*(.sekcemtk*)
+  	__sekcemtk_end__ = .;
+  } >SDRAMMTK
+  
+  /* Zkontrolujeme, jestli se nam to tam vejde */
+  ASSERT( LENGTH(SDRAMMTK) >= (__sekcemtk_end__ - __sekcemtk_start__), "Nevejdeme se do SDRAMMTK" )
+  
+  a promennou v kodu pak oznacit:
+  __attribute__((__section__(".sekcemtk"))) uint32_t pole[100];
+  
+  
+pak to pada...
+
+
+his isn't your main() function, but rather the Keil code to initialize the statics, ie copy initial content to RAM, and zero other areas. Once the __main function completes it calls your main function.
+
+Your code in SystemInit() needs to completely initialize the external bus and memories so that data you have directed to external memory via the linker can be placed there. This means clocks, pins, peripheral, all the things need to bring up the interface and devices attached to it.
+
+You should 'STOP' the debugger once your code crashes and see where it is, most likely in the while(1) loop of you Hard Fault Handler.
+
+
+
+Jina moznost ja asi dat rovnou adresu prez atribut:
+int32_t Array[xxxxx] __attribute__((at(0xD000000)));
+
+ale to nefaka - atribut ignorovan
+
+https://mcuoneclipse.com/2014/04/19/gnu-linker-can-you-not-initialize-my-variable/
+
+
+
+https://www.openstm32.org/Using+CCM+Memory?structure=Documentation
+
+
+
